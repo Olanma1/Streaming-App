@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: laravel-app
+    name: streaming-app
     env: php
     buildCommand: |
       composer install --optimize-autoloader --no-dev
