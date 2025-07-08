@@ -8,9 +8,13 @@ RUN apt-get update && apt-get install -y \
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
+WORKDIR /var/www
+COPY . /var/www
 
-# Set working directory
-WORKDIR /var/www/html
+# Point Apache to the public directory
+RUN rm -rf /var/www/html && \
+    ln -s /var/www/public /var/www/html
+
 
 # Copy existing application directory contents
 COPY . /var/www/html
