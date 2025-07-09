@@ -1,4 +1,4 @@
-# Use official PHP image with Apache
+# Use PHP 8.2 + Apache
 FROM php:8.2-apache
 
 # Install system dependencies
@@ -13,31 +13,36 @@ RUN a2enmod rewrite
 WORKDIR /var/www
 
 # Copy app files
-COPY . /var/www
+COPY . .
 
-# Point Apache to Laravel's public directory
+# Point Apache to public directory
 RUN rm -rf /var/www/html && ln -s /var/www/public /var/www/html
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install Laravel dependencies
+RUN composer install --optimize-autoloader --no-dev
 
-# Ensure the SQLite file exists for first deployment
+# Ensure DB file exists
 RUN mkdir -p /var/data && touch /var/data/database.sqlite
 
-# Permissions
+# Set permissions
 RUN chown -R www-data:www-data /var/www \
- && chmod -R 775 storage bootstrap/cache
+ && chmod -R 775 storage bootstrap/cache /var/data/database.sqlite
 
-# Laravel optimization commands (after env is correctly set)
+# Clear and cache config/routes/views
 RUN php artisan config:clear \
- && php artisan config:cache \
+ && php artisan route:clear \
+ && php artisan view:clear
+
+# Re-cache them (AFTER .env is copied)
+RUN php artisan config:cache \
  && php artisan route:cache \
  && php artisan view:cache
 
-# DO NOT run migrate here if database may not exist yet — better done on deploy or via entrypoint
+# Run migrations (only if needed)
+RUN php artisan migrate --force || true
 
-# Expose web port
+# Expose port
 EXPOSE 80
