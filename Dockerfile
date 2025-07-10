@@ -41,8 +41,10 @@ RUN php artisan config:cache \
  && php artisan route:cache \
  && php artisan view:cache
 
-# Run migrations (only if needed)
-RUN php artisan migrate --force || true
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
 
 # Expose port
 EXPOSE 80
