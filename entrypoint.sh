@@ -10,17 +10,18 @@ fi
 chown www-data:www-data /var/data/database.sqlite
 chmod 664 /var/data/database.sqlite
 
-# Laravel cache setup
+# Laravel cache clear (initial)
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
 
+# Run migrations
+php artisan migrate --force
+
+# Laravel cache rebuild (post-migration)
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-
-# Run migrations
-php artisan migrate --force
 
 # Start Apache
 exec apache2-foreground
